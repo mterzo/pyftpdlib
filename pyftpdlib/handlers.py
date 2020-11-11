@@ -302,6 +302,10 @@ class PassiveDTP(Acceptor):
         Acceptor.__init__(self, ioloop=cmd_channel.ioloop)
 
         local_ip = self.cmd_channel.socket.getsockname()[0]
+
+        if self.cmd_channel.data_channel_listen_address:
+            local_ip = self.cmd_channel.data_channel_listen_address
+
         if local_ip in self.cmd_channel.masquerade_address_map:
             masqueraded_ip = self.cmd_channel.masquerade_address_map[local_ip]
         elif self.cmd_channel.masquerade_address:
@@ -1149,6 +1153,12 @@ class FTPHandler(AsyncChat):
         When configured pyftpdlib will no longer use kernel-assigned
         random ports (default None).
 
+    - (str) data_channel_listen_address:
+        listen on this address when opening the port on a data channel.
+        when the control plane is connected via a routing mesh the interface
+        for the data plane may not be on that same as the
+        control plane default(None).
+
      - (bool) use_gmt_times:
         when True causes the server to report all ls and MDTM times in
         GMT and not local time (default True).
@@ -1206,6 +1216,7 @@ class FTPHandler(AsyncChat):
     permit_privileged_ports = False
     masquerade_address = None
     masquerade_address_map = {}
+    data_channel_listen_address = None
     passive_ports = None
     use_gmt_times = True
     use_sendfile = sendfile is not None
