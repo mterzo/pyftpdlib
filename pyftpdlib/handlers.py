@@ -14,6 +14,7 @@ import sys
 import time
 import traceback
 import warnings
+import ipaddress
 from datetime import datetime
 
 try:
@@ -303,13 +304,16 @@ class PassiveDTP(Acceptor):
 
         local_ip = self.cmd_channel.socket.getsockname()[0]
 
-        if self.cmd_channel.data_channel_listen_address:
-            local_ip = self.cmd_channel.data_channel_listen_address
+        logger.error("Local_IP: {}".format(local_ip))
 
-        if local_ip in self.cmd_channel.masquerade_address_map:
-            masqueraded_ip = self.cmd_channel.masquerade_address_map[local_ip]
-        elif self.cmd_channel.masquerade_address:
-            masqueraded_ip = self.cmd_channel.masquerade_address
+        if not ipaddress.ip_address(local_ip).is_loopback:
+            if self.cmd_channel.data_channel_listen_address:
+                local_ip = self.cmd_channel.data_channel_listen_address
+
+            if local_ip in self.cmd_channel.masquerade_address_map:
+                masqueraded_ip = self.cmd_channel.masquerade_address_map[local_ip]
+            elif self.cmd_channel.masquerade_address:
+                masqueraded_ip = self.cmd_channel.masquerade_address
         else:
             masqueraded_ip = None
 
